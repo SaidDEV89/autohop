@@ -1,7 +1,22 @@
+local request = request or http_request or httprequest or http
+local httpService = game:GetService("HttpService")
+
+local webhookSet = _G.Webhook ~= ""
 local placeID = game.PlaceId
 local teleportService = game:GetService("TeleportService")
-local httpService = game:GetService("HttpService")
 local foundNPC = false
+
+local function sendWebhookMessage(webhookURL, message)
+    local response = request({
+        Url = webhookURL,
+        Method = "POST",
+        Headers = {
+            ["Content-Type"] = "application/json"
+        },
+        Body = httpService:JSONEncode(message)
+    })
+    return response
+end
 
 local function checkForWindyBee()
     for _, child in ipairs(workspace.NPCBees:GetChildren()) do
@@ -36,14 +51,18 @@ local function hop()
     end
 end
 
-workspace.NPCBees.ChildAdded:Connect(function(child) --creds to you frfr
+workspace.NPCBees.ChildAdded:Connect(function(child)
     if child.Name == "Windy" then
-        foundNPC = true
+        if webhookSet then
+            foundNPC = true
+            local webhookURL = _G.Webhook
+            local message = {
+                content = "Windy Bee detected!"
+            }
+            sendWebhookMessage(webhookURL, message)
+        end
     end
 end)
-
-task.wait(1)
-checkForWindyBee()
 
 if not foundNPC then
     hop()
