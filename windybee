@@ -67,3 +67,4 @@ end)
 
 if not checkForWindyBee() then
     hop()
+end
