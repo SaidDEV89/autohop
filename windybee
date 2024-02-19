@@ -18,10 +18,17 @@ local function sendWebhookMessage(webhookURL, message)
     return response
 end
 
+if webhookSet then
+    sendWebhookMessage(_G.Webhook, {content = "Script started, webhook test message."})
+end
+
 local function checkForWindyBee()
     for _, child in ipairs(workspace.NPCBees:GetChildren()) do
         if child.Name == "Windy" then
             foundNPC = true
+            if webhookSet then
+                sendWebhookMessage(_G.Webhook, {content = "Windy Bee detected!"})
+            end
             break
         end
     end
@@ -55,15 +62,12 @@ workspace.NPCBees.ChildAdded:Connect(function(child)
     if child.Name == "Windy" then
         if webhookSet then
             foundNPC = true
-            local webhookURL = _G.Webhook
-            local message = {
-                content = "Windy Bee detected!"
-            }
-            sendWebhookMessage(webhookURL, message)
+            sendWebhookMessage(_G.Webhook, {content = "Windy Bee detected!"})
         end
     end
 end)
 
+checkForWindyBee()
 if not foundNPC then
     hop()
 end
