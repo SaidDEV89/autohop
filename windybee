@@ -18,10 +18,6 @@ local function sendWebhookMessage(webhookURL, message)
     return response
 end
 
-if webhookSet then
-    sendWebhookMessage(_G.Webhook, {content = "Script started, webhook test message."})
-end
-
 local function checkForWindyBee()
     for _, child in ipairs(workspace.NPCBees:GetChildren()) do
         if child.Name == "Windy" then
@@ -29,12 +25,17 @@ local function checkForWindyBee()
             if webhookSet then
                 sendWebhookMessage(_G.Webhook, {content = "Windy Bee detected!"})
             end
-            break
+            return true
         end
     end
+    return false
 end
 
 local function hop()
+    if webhookSet then
+        sendWebhookMessage(_G.Webhook, {content = "Server hopping for Windy Bee started."})
+    end
+
     local success, site = pcall(function()
         return httpService:JSONDecode(game:HttpGet('https://games.roblox.com/v1/games/' .. placeID .. '/servers/Public?sortOrder=Asc&limit=100'))
     end)
@@ -43,15 +44,13 @@ local function hop()
         return
     end
     
-    local foundServer = false
     for _, serverData in pairs(site.data) do
         if serverData.maxPlayers > serverData.playing then
             local serverID = tostring(serverData.id)
-            local success, _ = pcall(function()
+            local hopSuccess, _ = pcall(function()
                 teleportService:TeleportToPlaceInstance(placeID, serverID, game.Players.LocalPlayer)
             end)
-            if success then
-                foundServer = true
+            if hopSuccess then
                 break
             end
         end
@@ -61,13 +60,10 @@ end
 workspace.NPCBees.ChildAdded:Connect(function(child)
     if child.Name == "Windy" then
         if webhookSet then
-            foundNPC = true
             sendWebhookMessage(_G.Webhook, {content = "Windy Bee detected!"})
         end
     end
 end)
 
-checkForWindyBee()
-if not foundNPC then
+if not checkForWindyBee() then
     hop()
-end
