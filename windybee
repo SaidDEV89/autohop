@@ -7,6 +7,8 @@ local teleportService = game:GetService("TeleportService")
 local foundNPC = false
 
 local function sendWebhookMessage(webhookURL, message)
+    message.content = "@everyone " .. message.content
+    
     local response = request({
         Url = webhookURL,
         Method = "POST",
