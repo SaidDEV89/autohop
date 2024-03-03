@@ -1,3 +1,5 @@
+_G.Webhook = "REPLACE WITH YOUR DISCORD WEBHOOK"
+
 local request = request or http_request or httprequest or http
 local httpService = game:GetService("HttpService")
 
